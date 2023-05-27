@@ -16,3 +16,6 @@ Allows users to optionally provide read access to NFT content for collectibles o
 
 # futures
 - creating safe metaverses
+
+# protocol
+- it might be useful to distinguish an ERC721 that is public, and one that is partial private, with backwards compatibility
