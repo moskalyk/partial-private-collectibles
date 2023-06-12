@@ -10,6 +10,7 @@ dotenv.config();
 const Corestore = require('corestore')
 const store = new Corestore('./contact-book')
 const core = store.get({ name: 'core',valueEncoding: 'json' })
+const pgpKeys = store.get({ name: 'pgp',valueEncoding: 'json' })
 
 const serverPrivateKey = process.env!.pkey!
 
@@ -38,24 +39,36 @@ const getBalance = async () => {
     return balance.balance.balanceWei
 }
 
-// const auth = async (sequenceWalletAddress: string, ethAuthProofString: string) => {
+const auth = async (sequenceWalletAddress: string, ethAuthProofString: string) => {
 
-//     const chainId = 'mumbai'
-//     const walletAddress = sequenceWalletAddress
+    const chainId = 'mumbai'
+    const walletAddress = sequenceWalletAddress
 
-//     const api = new sequence.api.SequenceAPIClient('https://api.sequence.app')
+    const api = new sequence.api.SequenceAPIClient('https://api.sequence.app')
     
-//     const { isValid } = await api.isValidETHAuthProof({
-//         chainId, walletAddress, ethAuthProofString
-//     })
+    const { isValid } = await api.isValidETHAuthProof({
+        chainId, walletAddress, ethAuthProofString
+    })
 
-//     console.log(isValid)
+    console.log(isValid)
 
-//     if(!isValid) throw new Error('invalid wallet auth')
+    if(!isValid) throw new Error('invalid wallet auth')
 
-//     return isValid
+    return isValid
 
-// }
+}
+
+const getWalletKey = async (address: string) => {
+    for await (const el of pgpKeys.createReadStream()) {
+        if(el.address == address) return el.key
+    }
+    return null
+}
+
+const addWalletKey = async (address: string, key: string) => {
+    await pgpKeys.append({address: address, key: key})
+}
+
 const addContact = async (address: string, contact: string) => {
     await core.append({address: address, contact: contact})
 }
@@ -69,12 +82,13 @@ const getContactsByKey = async (address: string) => {
     return contacts
 }
 
-const executeTx = async (ethAuthProofString: string, sequenceWallet: string, tokenID: any) => {
+const executeTx = async (ethAuthProofString: string, sequenceWallet: string, tokenID: any, contacts: any[]) => {
 
-    // If you own the core
-    // await db.put(ethAuthProofString, sequenceWallet)
-    // console.log(ethAuthProofString, sequenceWallet)
-    // console.log(await db.get('key1'))
+    // get metadata from tokenID
+    // get public keys from address + and public key from address
+    // create encryption from metadata and public keys
+    // get new metadata CID hash
+    // update ownership and metadata
 
     return {transactionHash: '0x'}
 }

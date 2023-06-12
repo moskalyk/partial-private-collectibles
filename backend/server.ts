@@ -17,16 +17,18 @@ const processTransaction = async (transaction, callback) => {
     console.log('Running Tx in Queue...')
     console.log(transaction)
 
+    const contacts = await getContactsByKey(transaction.wallet)
 
-    // const tx = await executeTx(
-    //     transaction.sig,
-    //     transaction.sequenceWallet, 
-    //     transaction.tokenID
-    // )
+    const tx = await executeTx(
+        transaction.sig,
+        transaction.sequenceWallet, 
+        transaction.tokenID,
+        contacts
+    )
     // ...
     // await wait(1000)
     // Call the callback function to signal completion
-    callback();
+    callback(tx);
 };
 
 const transactionQueue = async.queue(processTransaction, 1);
@@ -48,18 +50,18 @@ app.post('/transaction', (req, res) => {
     });
   });
 
-app.post('/transaction', async (req: any, res: any) => {
-    try{
-        const tx = await executeTx(
-                            req.body.sequenceWallet, 
-                            req.body.sig,
-                            req.body.tokenID
-                        )
-        res.send({tx: tx.transactionHash, status: 200})
-    }catch(e){
-        res.send({msg: e, status: 500})
-    }
-})
+// app.post('/transaction', async (req: any, res: any) => {
+//     try{
+//         const tx = await executeTx(
+//                             req.body.sequenceWallet, 
+//                             req.body.sig,
+//                             req.body.tokenID
+//                         )
+//         res.send({tx: tx.transactionHash, status: 200})
+//     }catch(e){
+//         res.send({msg: e, status: 500})
+//     }
+// })
 
 app.post('/addContact', async (req, res) => {
     await addContact(req.body.wallet, req.body.contact)
